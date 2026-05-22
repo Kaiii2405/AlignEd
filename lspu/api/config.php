@@ -1,9 +1,9 @@
 <?php
-define('DB_HOST', 'sql300.infinityfree.com');
-define('DB_NAME', 'if0_41954168_lspu_schedule');
-define('DB_USER', 'if0_41954168');
-define('DB_PASS', 'LMTlCondY7Ion');
-define('DB_PORT', 3306); // ← this was missing!
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'lspu_schedule');
+define('DB_USER', 'root');       
+define('DB_PASS', '');            
+define('DB_PORT', 3306);
 
 function getDB(): PDO {
     static $pdo = null;
