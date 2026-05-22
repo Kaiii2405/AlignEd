@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LSPU — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body class="login-body">
+
+<div id="login-page">
+  <div class="login-brand">
+    Laguna State Polytechnic University
+    <span>College of Computer Studies</span>
+  </div>
+
+  <!-- ── STEP 1: Sign In / Sign Up ── -->
+  <div class="login-container" id="loginContainer">
+
+    <!-- Sign Up Form -->
+    <div class="login-form-container login-sign-up">
+      <form onsubmit="return false;">
+        <h1>Create Account</h1>
+        <div class="login-social-icons">
+          <a href="#" title="Google (coming soon)"><i class="fa-brands fa-google-plus-g"></i></a>
+          <a href="#" title="Facebook (coming soon)"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" title="GitHub (coming soon)"><i class="fa-brands fa-github"></i></a>
+          <a href="#" title="LinkedIn (coming soon)"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+        <span>or use your email for registration</span>
+        <input type="text"     id="reg-name"     placeholder="Full Name"/>
+        <input type="email"    id="reg-email"    placeholder="Email"/>
+        <input type="password" id="reg-password" placeholder="Password (min. 6 chars)"/>
+        <div class="login-error" id="reg-error"></div>
+        <button onclick="doRegister()">Sign Up</button>
+      </form>
+    </div>
+
+    <!-- Sign In Form -->
+    <div class="login-form-container login-sign-in">
+      <form onsubmit="return false;">
+        <h1>Sign In</h1>
+        <div class="login-social-icons">
+          <a href="#" title="Google (coming soon)"><i class="fa-brands fa-google-plus-g"></i></a>
+          <a href="#" title="Facebook (coming soon)"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" title="GitHub (coming soon)"><i class="fa-brands fa-github"></i></a>
+          <a href="#" title="LinkedIn (coming soon)"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+        <span>or use your email &amp; password</span>
+        <input type="email"    id="login-email"    placeholder="Email"/>
+        <input type="password" id="login-password" placeholder="Password"/>
+        <a href="#">Forgot your password?</a>
+        <div class="login-error" id="login-error"></div>
+        <button onclick="doLogin()">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Toggle Panel -->
+    <div class="login-toggle-container">
+      <div class="login-toggle">
+        <div class="login-toggle-panel login-toggle-left">
+          <h1>Welcome Back!</h1>
+          <p style="color:rgb(255, 255, 255);">Enter your credentials to access your schedule</p>
+          <button class="hidden" id="loginBtn">Sign In</button>
+        </div>
+        <div class="login-toggle-panel login-toggle-right">
+          <h1>Hello, Friend!</h1>
+          <p style="color:rgb(255, 255, 255);">Register to start managing your class schedule</p>
+          <button class="hidden" id="registerBtn">Sign Up</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Choose Section ── -->
+  <div class="section-picker-overlay" id="sectionPickerOverlay">
+    <div class="section-picker-card">
+      <div class="sp-card-header">
+        <div class="sp-card-icon">🎓</div>
+        <h2 class="sp-card-title">Choose Your Section</h2>
+        <p class="sp-card-sub" id="sp-greeting">Welcome! Select the section you are currently enrolled in.</p>
+      </div>
+
+      <div class="sp-year-tabs" id="spYearTabs">
+        <button class="sp-year-btn active" onclick="setYear(2)" id="yr-2">2nd Year</button>
+      </div>
+
+      <div class="sp-section-grid" id="spSectionGrid">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="sp-card-footer">
+        <p class="sp-note">You can change your section later from the app settings.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #login-page -->
+
+<script src="script.js"></script>
+<script>
+  // Init toggle buttons
+  const loginContainer = document.getElementById('loginContainer');
+  document.getElementById('registerBtn').addEventListener('click', () => loginContainer.classList.add('active'));
+  document.getElementById('loginBtn').addEventListener('click',    () => loginContainer.classList.remove('active'));
+
+  // Only redirect if full session (user + section). Clear incomplete sessions so login always shows.
+  (function() {
+    const s = getSession();
+    if (s && s.section) {
+      window.location.href = 'schedule.html';
+    } else if (s && !s.section) {
+      saveSession(null);
+    }
+  })();
+</script>
+</body>
+</html>

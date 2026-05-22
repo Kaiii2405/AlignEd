@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LSPU Schedule Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body class="app-body">
+
+<div id="app-page">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-school">Laguna State Polytechnic University</div>
+      <div class="topbar-college">College of Computer Studies — AlignEd</div>
+    </div>
+    <div class="topbar-right">
+      <div>
+        <div class="topbar-section" id="topbar-section">BS INFO —</div>
+        <div class="topbar-sem">Second Semester, AY 2025–2026</div>
+      </div>
+      <span class="topbar-user" id="topbar-user"></span>
+
+      <!-- Hamburger menu -->
+      <div class="topbar-menu-wrap" id="topbarMenuWrap">
+        <button class="topbar-menu-btn" onclick="toggleTopbarMenu(event)" id="topbarMenuBtn" title="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-dropdown" id="topbarDropdown">
+          <button class="td-item" onclick="openEditProfile();closeTopbarMenu()">
+            <span class="td-icon">✏️</span> Edit Profile
+          </button>
+          <button class="td-item" onclick="openBackupPanel();closeTopbarMenu()">
+            <span class="td-icon">🗂️</span> Backups
+          </button>
+          <div class="td-divider"></div>
+          <button class="td-item td-item-danger" onclick="doLogout()">
+            <span class="td-icon">🚪</span> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP PANEL -->
+  <div class="backup-overlay" id="backupOverlay" onclick="closeBackupPanel()"></div>
+  <div class="backup-panel" id="backupPanel">
+    <div class="backup-panel-header">
+      <div>
+        <div class="backup-panel-title">Schedule Backups</div>
+        <div class="backup-panel-sub">Up to 5 snapshots — auto-saved on every change</div>
+      </div>
+      <button class="backup-panel-close" onclick="closeBackupPanel()">×</button>
+    </div>
+    <div class="backup-panel-actions">
+      <button class="backup-manual-btn" onclick="manualBackup()">Save Backup Now</button>
+    </div>
+    <div id="backup-list" class="backup-list"></div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-my"     onclick="switchTab('my')">📅 My Schedule</div>
+    <div class="nav-tab"        id="tab-browse" onclick="switchTab('browse')">🔍 Browse Subjects by Section</div>
+  </div>
+
+  <!-- ══ MY SCHEDULE TAB ══ -->
+  <div id="view-my" class="layout">
+    <aside class="sidebar">
+      <div class="sb-search-wrap">
+        <div class="sb-search-box">
+          <i class="fa-solid fa-magnifying-glass sb-search-icon"></i>
+          <input type="text" id="sb-search-input" class="sb-search-input" placeholder="Search subjects…" oninput="searchSubjects(this.value)"/>
+          <button class="sb-search-clear" id="sb-search-clear" onclick="clearSearch()" title="Clear search">×</button>
+        </div>
+        <div id="sb-search-results" class="sb-search-results" style="display:none;"></div>
+      </div>
+      <div>
+        <div class="sb-label">Legend</div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot ld-fixed"></div>Existing fixed class</div>
+          <div class="leg-item"><div class="leg-dot ld-enrolled"></div>Enrolled (Browse tab)</div>
+          <div class="leg-item"><div class="leg-dot ld-added"></div>Manually added</div>
+          <div class="leg-item"><div class="leg-dot ld-hover"></div>Free slot (hover to add)</div>
+          <div class="leg-item"><div class="leg-dot ld-conflict"></div>Conflict detected</div>
+        </div>
+      </div>
+      <div>
+        <div class="sb-label">Current Subjects</div>
+        <div id="sb-subjects"></div>
+      </div>
+      <div id="sb-clear-wrap" style="display:none;">
+        <button class="sb-btn sb-btn-danger" onclick="clearAdded()">✕ Clear added subjects</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="prog-header">
+        <div>
+          <div class="prog-name" id="prog-name-text">BS in Information Technology — 2nd Year</div>
+          <div class="prog-meta" id="prog-meta-text">Second Semester, AY 2025–2026</div>
+        </div>
+        <div class="prog-stats">
+          <div class="stat-box">
+            <div class="stat-num" id="stat-subjects">0</div>
+            <div class="stat-lbl">Subjects</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="stat-added">0</div>
+            <div class="stat-lbl">Added</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-wrap">
+        <div class="grid-title">
+          <div class="grid-title-text">Weekly Class Schedule</div>
+          <button class="grid-print-btn" onclick="window.print()">Print Subject</button>
+        </div>
+        <div class="grid-scroll">
+          <table class="sched">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+              </tr>
+            </thead>
+            <tbody id="sched-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="enrolled-panel">
+        <div class="ep-header">
+          <div class="ep-title">Added Subjects</div>
+          <div class="ep-count" id="ap-count">0 subjects</div>
+        </div>
+        <div id="ap-body">
+          <div class="ep-empty">No subjects added yet — hover the free slots on the schedule to add.</div>
+        </div>
+      </div>
+
+      <div class="prepared-by">Prepared by: <strong>RONNEL A. DELA CRUZ</strong> — Associate Dean</div>
+    </main>
+  </div>
+
+  <!-- ══ BROWSE TAB ══ -->
+  <div id="view-browse" style="display:none;">
+    <div class="browse-wrap">
+
+      <div>
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Choose a Subject</div>
+            <div class="step-sub">Select the subject you want to enroll in</div>
+          </div>
+        </div>
+        <div class="subj-picker-grid" id="subj-picker-grid"></div>
+      </div>
+
+      <div id="step2-wrap" style="display:none;">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Choose a Section</div>
+            <div class="step-sub" id="step2-sub">Available sections</div>
+          </div>
+        </div>
+        <div class="section-bar" id="section-bar"></div>
+      </div>
+
+      <div id="sec-sched-wrap" style="display:none;">
+        <div class="sec-sched-card">
+          <div class="sec-sched-header">
+            <div class="sec-sched-title" id="sec-sched-title">Section Schedule</div>
+            <div class="sec-sched-badge" id="sec-sched-badge"></div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="sched">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+                </tr>
+              </thead>
+              <tbody id="sec-sched-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="enrolled-panel">
+        <div class="ep-header">
+          <div class="ep-title">My Enrolled Subjects</div>
+          <div class="ep-count" id="browse-ep-count">0 subjects</div>
+        </div>
+        <div id="browse-ep-body">
+          <div class="ep-empty">No subjects enrolled yet — browse sections above and click a subject block to enroll.</div>
+        </div>
+      </div>
+
+      <div class="prepared-by">Prepared by: <strong>RONNEL A. DELA CRUZ</strong> — Associate Dean</div>
+    </div>
+  </div>
+
+  <!-- TOOLTIP -->
+  <div class="tt-overlay" id="ttOverlay" onclick="closeTT()">
+    <div class="tt" id="ttBox" onclick="event.stopPropagation()" style="display:none;">
+      <div class="tt-code"    id="tt-code"></div>
+      <div class="tt-rows"    id="tt-rows"></div>
+      <div class="tt-actions" id="tt-actions"></div>
+    </div>
+  </div>
+
+  <!-- ADD MODAL (free slot) -->
+  <div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title-text">Add to Free Slot</div>
+          <div class="modal-sub"   id="modal-slot-info">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body"   id="modal-body-content"></div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn" id="modal-add-btn" onclick="doModalAdd()">Add to Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION SUBJECT MODAL -->
+  <div class="modal-overlay" id="secModal" onclick="if(event.target===this)closeSecModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="sec-modal-title">Subject Details</div>
+          <div class="modal-sub"   id="sec-modal-sub">—</div>
+        </div>
+        <button class="modal-close" onclick="closeSecModal()">×</button>
+      </div>
+      <div class="modal-body"   id="sec-modal-body"></div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeSecModal()">Cancel</button>
+        <button class="modal-btn" id="sec-modal-add-btn" onclick="doSecAdd()">Enroll this Subject</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #app-page -->
+
+  <!-- EDIT PROFILE MODAL (body-level so z-index is never clipped) -->
+  <div class="modal-overlay" id="editProfileModal" onclick="if(event.target===this)closeEditProfile()">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Edit Profile</div>
+          <div class="modal-sub">Update your display name and section</div>
+        </div>
+        <button class="modal-close" onclick="closeEditProfile()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Display Name</label>
+          <input id="edit-name-input" type="text" maxlength="60" placeholder="Your full name"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);
+                   font-family:'DM Mono',monospace;font-size:13px;color:var(--text);
+                   background:var(--surface3);outline:none;box-sizing:border-box;"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Section</label>
+          <div id="edit-section-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
+          <p style="font-size:11px;color:var(--text3);margin-top:8px;">⚠️ Changing section will reload your fixed schedule.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeEditProfile()">Cancel</button>
+        <button class="modal-btn modal-btn-add" onclick="saveEditProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+<script>
+  // Guard: must be logged in with a section chosen
+  (function() {
+    const s = getSession();
+    if (!s || !s.section) {
+      window.location.href = 'index.html';
+      return;
+    }
+    initApp(s);
+  })();
+</script>
+</body>
+</html>
